@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Processor Pro</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh; color: #fff; overflow-x: hidden;
+        }
+        .bg-particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+        .particle { position: absolute; width: 2px; height: 2px; background: rgba(64,224,208,.6); border-radius: 50%; animation: float 6s infinite linear; }
+        @keyframes float { 0%{transform:translateY(100vh);opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{transform:translateY(-100px);opacity:0;} }
+        .header { background:rgba(255,255,255,.05); backdrop-filter:blur(20px); border-bottom:1px solid rgba(255,255,255,.1); padding:1rem 0; position:sticky; top:0; z-index:100; }
+        .header-content { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:0 2rem; }
+        .logo { font-size:1.5rem; font-weight:700; background:linear-gradient(135deg,#40e0d0,#00bcd4,#0099cc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .status-indicator { display:flex; align-items:center; gap:.5rem; font-size:.875rem; }
+        .status-dot { width:8px; height:8px; border-radius:50%; background:#00ff88; box-shadow:0 0 10px rgba(0,255,136,.5); animation:pulse 2s infinite; }
+        @keyframes pulse {0%,100%{opacity:1;}50%{opacity:.5;}}
+        .container { max-width:800px; margin:4rem auto; padding:0 2rem; }
+        .main-card { background:rgba(255,255,255,.08); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,.15); border-radius:24px; padding:3rem; box-shadow:0 25px 50px rgba(0,0,0,.3); transition:.3s; position:relative; overflow:hidden; }
+        .main-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(64,224,208,.8),transparent); }
+        .main-card:hover { transform:translateY(-5px); box-shadow:0 35px 70px rgba(0,0,0,.4); }
+        .title { text-align:center; font-size:2.5rem; font-weight:700; margin-bottom:1rem; background:linear-gradient(135deg,#fff,#40e0d0); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .subtitle { text-align:center; font-size:1.1rem; opacity:.8; margin-bottom:3rem; line-height:1.6; }
+        .form-group { margin-bottom:2rem; }
+        .form-label { display:block; font-size:.875rem; font-weight:600; margin-bottom:.5rem; color:#40e0d0; text-transform:uppercase; letter-spacing:.5px; }
+        .form-input,.form-select { width:100%; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.15); border-radius:12px; padding:1rem 1.25rem; font-size:1rem; color:#fff; transition:.3s; backdrop-filter:blur(10px); }
+        .form-input:focus,.form-select:focus { outline:none; border-color:#40e0d0; box-shadow:0 0 0 3px rgba(64,224,208,.15); background:rgba(255,255,255,.08); }
+        .form-input::placeholder { color:rgba(255,255,255,.5); }
+        .form-select option { background:#1a1a2e; color:#fff; }
+        .submit-btn { width:100%; background:linear-gradient(135deg,#40e0d0,#00bcd4); border:none; border-radius:12px; padding:1.25rem 2rem; font-size:1.1rem; font-weight:600; color:#fff; cursor:pointer; transition:.3s; text-transform:uppercase; letter-spacing:.5px; position:relative; overflow:hidden; }
+        .submit-btn:hover { transform:translateY(-2px); box-shadow:0 15px 35px rgba(64,224,208,.4); }
+        .submit-btn:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+        .loading { display:inline-block; width:20px; height:20px; border:2px solid rgba(255,255,255,.3); border-radius:50%; border-top-color:#fff; animation:spin 1s linear infinite; margin-right:.5rem; }
+        @keyframes spin { to{transform:rotate(360deg);} }
+        .result-section { margin-top:3rem; padding-top:2rem; border-top:1px solid rgba(255,255,255,.1); }
+        .result-card { background:rgba(0,255,136,.1); border:1px solid rgba(0,255,136,.3); border-radius:16px; padding:1.5rem; margin-bottom:1rem; backdrop-filter:blur(10px); }
+        .result-card.error { background:rgba(255,107,107,.1); border-color:rgba(255,107,107,.3); }
+        .result-header { display:flex; align-items:center; gap:.5rem; font-weight:600; margin-bottom:1rem; font-size:.875rem; text-transform:uppercase; letter-spacing:.5px; }
+        .result-content { background:rgba(0,0,0,.2); border-radius:8px; padding:1rem; font-family:monospace; font-size:.875rem; white-space:pre-wrap; word-break:break-all; }
+        .copy-btn { background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); border-radius:6px; padding:.5rem 1rem; color:#fff; cursor:pointer; font-size:.75rem; transition:.2s; margin-top:.5rem; }
+        .copy-btn:hover { background:rgba(255,255,255,.2); }
+        .progress-bar { width:100%; height:4px; background:rgba(255,255,255,.1); border-radius:2px; overflow:hidden; margin-bottom:1rem; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,#40e0d0,#00bcd4); width:0%; transition:.3s; border-radius:2px; }
+        .progress-fill.indeterminate { width:30%; animation:indeterminate 2s infinite linear; }
+        @keyframes indeterminate { 0%{transform:translateX(-100%);}100%{transform:translateX(400%);} }
+    </style>
+</head>
+<body>
+    <div class="bg-particles" id="particles"></div>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">🔗 LinkProcessor Pro</div>
+            <div class="status-indicator"><div class="status-dot"></div><span>System Online</span></div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-card">
+            <h1 class="title">Link Processor</h1>
+            <p class="subtitle">Frontend → n8n Workflow → Discord Bot → Kết quả</p>
+
+            <form id="processForm">
+                <div class="form-group">
+                    <label class="form-label">Link cần xử lý</label>
+                    <input type="url" id="linkInput" class="form-input" placeholder="https://example.com/your-link" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Loại xử lý</label>
+                    <select id="typeSelect" class="form-select" required>
+                        <option value="">Chọn loại</option>
+                        <option value="link4m">Link4m</option>
+                        <option value="layma.net">Layma.net</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="platformGroup" style="display:none;">
+                    <label class="form-label">Platform</label>
+                    <select id="platformSelect" class="form-select">
+                        <option value="">Chọn platform</option>
+                        <option value="google">Google</option>
+                        <option value="facebook">Facebook</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span id="btnText">Xử lý Link</span>
+                </button>
+            </form>
+
+            <div class="result-section" id="resultSection" style="display:none;">
+                <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                <div id="resultContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Particle background
+        function createParticles(){const c=document.getElementById('particles');for(let i=0;i<50;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDelay=Math.random()*6+'s';p.style.animationDuration=(Math.random()*3+3)+'s';c.appendChild(p);}}
+        createParticles();
+
+        const form=document.getElementById('processForm');
+        const typeSelect=document.getElementById('typeSelect');
+        const platformGroup=document.getElementById('platformGroup');
+        const platformSelect=document.getElementById('platformSelect');
+        const submitBtn=document.getElementById('submitBtn');
+        const btnText=document.getElementById('btnText');
+        const resultSection=document.getElementById('resultSection');
+        const resultContainer=document.getElementById('resultContainer');
+        const progressFill=document.getElementById('progressFill');
+
+        // 👉 Thay URL này bằng webhook thật của bạn trên n8n
+        const API_ENDPOINT='https://test-instance.n8n.cloud/webhook/process-link';
+
+        typeSelect.addEventListener('change',()=>{if(typeSelect.value==='layma.net'){platformGroup.style.display='block';platformSelect.required=true;}else{platformGroup.style.display='none';platformSelect.required=false;platformSelect.value='';}});
+
+        form.addEventListener('submit',async e=>{
+            e.preventDefault();
+            const typeValue=typeSelect.value;
+            const formData={link:document.getElementById('linkInput').value,type:typeValue,requestId:generateRequestId()};
+            if(typeValue==='layma.net'){const platformValue=platformSelect.value;if(!platformValue){alert('Vui lòng chọn platform cho Layma.net');return;}formData.platform=platformValue;}
+            submitBtn.disabled=true;btnText.innerHTML='<div class="loading"></div>Đang xử lý...';resultSection.style.display='block';progressFill.className='progress-fill indeterminate';resultContainer.innerHTML='';
+
+            try{
+                const res=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(formData)});
+                const data=await res.json();
+                if(res.ok && data.status==='success'){showResult(data);}else{showError(data.error||'Có lỗi xảy ra khi xử lý link');}
+            }catch(err){showError('Có lỗi xảy ra: '+err.message);}
+            finally{submitBtn.disabled=false;btnText.textContent='Xử lý Link';progressFill.className='progress-fill';progressFill.style.width='100%';}
+        });
+
+        function generateRequestId(){return 'req_'+Date.now()+'_'+Math.random().toString(36).substr(2,9);}
+        function showResult(result){const card=document.createElement('div');card.className='result-card';card.innerHTML=`<div class="result-header">✅ Xử lý thành công</div><div class="result-content">${JSON.stringify(result,null,2)}</div>${result.processedLink?`<button class="copy-btn" onclick="copyToClipboard('${result.processedLink}')">📋 Copy Link</button>`:''}`;resultContainer.appendChild(card);}
+        function showError(msg){progressFill.style.width='0%';const card=document.createElement('div');card.className='result-card error';card.innerHTML=`<div class="result-header">❌ Lỗi xử lý</div><div class="result-content">${msg}</div>`;resultContainer.appendChild(card);}
+        function copyToClipboard(t){navigator.clipboard.writeText(t).then(()=>{const toast=document.createElement('div');toast.textContent='✅ Đã copy vào clipboard!';toast.style.cssText=`position:fixed;top:20px;right:20px;background:rgba(0,255,136,.9);color:#000;padding:1rem;border-radius:8px;font-weight:600;z-index:1000;animation:slideIn .3s ease;`;document.body.appendChild(toast);setTimeout(()=>toast.remove(),3000);});}
+        const style=document.createElement('style');style.textContent=`@keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}`;document.head.appendChild(style);
+
+        setInterval(()=>{document.querySelector('.status-dot').style.background=Math.random()>.1?'#00ff88':'#ffaa00';},5000);
+    </script>
+</body>
+</html>
